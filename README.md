@@ -1,2 +1,2 @@
 # DS
-Some Data Science Projects
+Learning Data Sciencem; Some Data Science Projects.
