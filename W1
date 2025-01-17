@@ -1,0 +1,376 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "private_outputs": true,
+      "provenance": [],
+      "authorship_tag": "ABX9TyOMEqv4H/sFGsvYygljNkCv",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/rajanintheus/DataScience/blob/main/W1\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "2n542yAuA80k"
+      },
+      "outputs": [],
+      "source": [
+        "# Import necessary libraries\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns\n",
+        "import re # Import the 're' module"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Load the dataset\n",
+        "# Replace with your dataset path or use Google Colab's file upload feature\n",
+        "from google.colab import files\n",
+        "uploaded = files.upload()\n",
+        "data = pd.read_excel(list(uploaded.keys())[0], sheet_name='Sheet1')"
+      ],
+      "metadata": {
+        "id": "bIpzQHukD-np"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# General dataset overview\n",
+        "def dataset_overview(data):\n",
+        "    print(\"Dataset Overview:\")\n",
+        "    print(data.info())\n",
+        "    print(\"\\nSummary Statistics:\")\n",
+        "    print(data.describe(include='all'))\n",
+        "    print(\"\\nMissing Values:\")\n",
+        "    print(data.isnull().sum())"
+      ],
+      "metadata": {
+        "id": "EiqQrAc9D6PQ"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Basic data cleaning: Dropping duplicates and checking missing values\n",
+        "df_cleaned = data.drop_duplicates()"
+      ],
+      "metadata": {
+        "id": "HidRbDqRBGCz"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Function to generate bar charts\n",
+        "def plot_optimized_distribution(column_name, title, xlabel, ylabel, max_categories=5, figsize=(6, 4)):\n",
+        "    \"\"\"\n",
+        "    Plots a bar chart for categorical data with limited categories and reduced figure size.\n",
+        "    \"\"\"\n",
+        "    try:\n",
+        "        data = df_cleaned[column_name].value_counts().head(max_categories)\n",
+        "        plt.figure(figsize=figsize)\n",
+        "        data.plot(kind='bar', color=sns.color_palette('pastel'))\n",
+        "        plt.title(title, fontsize=12)\n",
+        "        plt.xlabel(xlabel, fontsize=10)\n",
+        "        plt.ylabel(ylabel, fontsize=10)\n",
+        "        plt.xticks(rotation=45, ha='right', fontsize=8)\n",
+        "        plt.tight_layout()\n",
+        "        plt.show()\n",
+        "    except Exception as e:\n",
+        "        print(f\"Error while plotting {title}: {e}\")"
+      ],
+      "metadata": {
+        "id": "8QbV4rtAJJ2Q"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Function to generate word clouds\n",
+        "def preprocess_text(text_data, remove_words):\n",
+        "    \"\"\"\n",
+        "    Preprocess text data by removing specified words.\n",
+        "    \"\"\"\n",
+        "    text = ' '.join(text_data.dropna().astype(str))\n",
+        "    for word in remove_words:\n",
+        "        text = re.sub(fr'\\b{word}\\b', '', text, flags=re.IGNORECASE)\n",
+        "    return text"
+      ],
+      "metadata": {
+        "id": "yqb82NkyJJ5q"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "from wordcloud import WordCloud\n",
+        "def generate_word_cloud(text_data, title, figsize=(8, 6)):\n",
+        "    \"\"\"\n",
+        "    Generates and displays a word cloud from the given text data.\n",
+        "    \"\"\"\n",
+        "    try:\n",
+        "        wordcloud = WordCloud(width=800, height=400, background_color='white', colormap='viridis').generate(text_data)\n",
+        "        plt.figure(figsize=figsize)\n",
+        "        plt.imshow(wordcloud, interpolation='bilinear')\n",
+        "        plt.axis('off')\n",
+        "        plt.title(title, fontsize=14)\n",
+        "        plt.tight_layout()\n",
+        "        plt.show()\n",
+        "    except Exception as e:\n",
+        "        print(f\"Error generating word cloud for {title}: {e}\")\n"
+      ],
+      "metadata": {
+        "id": "X49i6G5sJJ8j"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Visualizations\n",
+        "# 1. Top Hobbies or Favorite Activities\n",
+        "filtered_text_hobbies = preprocess_text(\n",
+        "    df_cleaned['What are your hobbies or favorite activities?\\xa0'],\n",
+        "    remove_words=['hobbies', 'hobby', 'activities']\n",
+        ")\n",
+        "generate_word_cloud(filtered_text_hobbies, 'Refined Word Cloud: Top Favorite Activities')"
+      ],
+      "metadata": {
+        "id": "KvCLMnj7JJ_t"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# 2. Top Academic and Professional Backgrounds\n",
+        "filtered_text_backgrounds = preprocess_text(\n",
+        "    df_cleaned['What is your academic and/or professional background\\nWithin your response answer the following questions:\\xa0\\n\\xa0Are you a full-time student?\\xa0\\n\\xa0Are you balancing both working and school?'],\n",
+        "    remove_words=[]\n",
+        ")\n",
+        "generate_word_cloud(filtered_text_backgrounds, 'Word Cloud: Top Academic and Professional Backgrounds')"
+      ],
+      "metadata": {
+        "id": "HEskxxEDJKDG"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# 3. Likelihood of Taking a Vacation (500+ Miles)\n",
+        "plot_optimized_distribution(\n",
+        "    'How likely are you to....take a vacation at least 500 miles from home in the next year?',\n",
+        "    'Likelihood of Taking a Vacation (500+ Miles)',\n",
+        "    'Likelihood',\n",
+        "    'Number of Respondents'\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "hkRKw2DXJKHJ"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# 4. Likelihood of Graduating in the Next Year\n",
+        "plot_optimized_distribution(\n",
+        "    'How likely are you to....graduate in the next year?',\n",
+        "    'Likelihood of Graduating in the Next Year',\n",
+        "    'Likelihood',\n",
+        "    'Number of Respondents'\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "mnJwhvKAKd9s"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# 5. Likelihood of Attending a Comedy Show\n",
+        "plot_optimized_distribution(\n",
+        "    'How likely are you to....buy tickets to a comedy show?',\n",
+        "    'Likelihood of Attending a Comedy Show',\n",
+        "    'Likelihood',\n",
+        "    'Number of Respondents'\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "xCXkeMcgKeJm"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# 6. Likelihood of Taking a Weekend Nap\n",
+        "plot_optimized_distribution(\n",
+        "    'How likely are you to....take a nap on the weekend?',\n",
+        "    'Likelihood of Taking a Weekend Nap',\n",
+        "    'Likelihood',\n",
+        "    'Number of Respondents'\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "pSR9pIiPKeN9"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Data Exploration: Top 5 most common BI tools respondents want to learn\n",
+        "bi_tool_interest = df_cleaned['Which BI tool are you the most interested to learn?'].value_counts()"
+      ],
+      "metadata": {
+        "id": "gBpRTRk_Gf5K"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Visualizing BI tool interest\n",
+        "plt.figure(figsize=(8, 5))\n",
+        "bi_tool_interest.plot(kind='bar', color='skyblue')\n",
+        "plt.title('Interest in BI Tools')\n",
+        "plt.xlabel('BI Tool')\n",
+        "plt.ylabel('Number of Respondents')\n",
+        "plt.xticks(rotation=45)\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "I67Af_V0BGGk"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Analyzing time zones of respondents\n",
+        "time_zones = df_cleaned['Select the Time Zone from which you expect to complete most of this course'].value_counts()\n",
+        "\n",
+        "# Visualizing time zone distribution\n",
+        "plt.figure(figsize=(8, 5))\n",
+        "time_zones.plot(kind='bar', color='lightgreen')\n",
+        "plt.title('Respondents by Time Zone')\n",
+        "plt.xlabel('Time Zone')\n",
+        "plt.ylabel('Number of Respondents')\n",
+        "plt.xticks(rotation=45)\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "2zwzmf5_GdyC"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Age group analysis\n",
+        "age_groups = df_cleaned['What is your age'].value_counts()"
+      ],
+      "metadata": {
+        "id": "Y3Tzfm56Gd2G"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Visualizing age distribution\n",
+        "plt.figure(figsize=(8, 5))\n",
+        "age_groups.plot(kind='pie', autopct='%1.1f%%', colors=sns.color_palette('pastel'))\n",
+        "plt.title('Age Group Distribution')\n",
+        "plt.ylabel('')\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "9orYp8FbGv-2"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Show an overview of the dataset\n",
+        "dataset_overview(df_cleaned)"
+      ],
+      "metadata": {
+        "id": "waV2JPZkGwaL"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "WUFW4PnNBGPh"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "5FaEOWqOBGSf"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
